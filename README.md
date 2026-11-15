@@ -181,5 +181,29 @@ npm run build
 
 ---
 
+## 9. Google Cloud Run Deployment Guide
+
+AayuCare comes pre-configured with a production-ready multi-stage `Dockerfile` and `nginx.conf` designed specifically for **Google Cloud Run** on port `8080`.
+
+### Option A: 1-Click via Cloud Run Console (Zero Laptop Installation)
+1. Go to the [Google Cloud Console - Cloud Run](https://console.cloud.google.com/run).
+2. Click **Create Service**.
+3. Select **"Continuously deploy from a repository"** and connect `https://github.com/erica-maitri/AayuCare`.
+4. Select branch `main` and Build Type **Dockerfile**.
+5. Check **"Allow unauthenticated invocations"** (public web app).
+6. Click **Create**. Cloud Run automatically builds and gives you a live public HTTPS URL (e.g., `https://aayucare-xxxx.a.run.app`).
+
+### Option B: Via Google Cloud Shell (In Browser, No Laptop Install)
+Open [Google Cloud Shell](https://shell.cloud.google.com) and run:
+```bash
+git clone https://github.com/erica-maitri/AayuCare.git
+cd AayuCare
+gcloud run deploy aayucare \
+  --source . \
+  --region asia-south1 \
+  --allow-unauthenticated
+```
+---
+
 *Designed and engineered with care for India's seniors and their families.*
 
