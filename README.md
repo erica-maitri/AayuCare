@@ -66,6 +66,8 @@ graph TD
 ```
 
 ### Core Architecture Components:
+- **Relational Healthcare Schema (`database/schema.sql`):** High-throughput PostgreSQL / Supabase schema with composite indices for drug conflict queries, time-series vitals telemetry, and adherence logs.
+- **Continuous Integration Pipeline (`.github/workflows/ci.yml`):** Automated GitHub Actions workflow verifying TypeScript builds and running the 12 Vitest suites on every commit.
 - **Type-Safe Domain Models (`src/types/index.ts`):** Strict TypeScript contracts for Patients, Medications, Schedules, Drug Interactions, Vitals, Appointments, and Escalations.
 - **Bi-Directional Conflict Detection Engine (`src/utils/conflictDetector.ts`):** Cross-analyzes brand names, chemical active ingredients, and pharmacological classes before any new drug is committed to state.
 - **Context-Aware AI Assistant — AayuMitra (`src/components/common/SmartAssistantModal.tsx`):** Health assistant cognizant of Ram Prasad's active prescriptions, latest blood pressure, and pending schedule.
