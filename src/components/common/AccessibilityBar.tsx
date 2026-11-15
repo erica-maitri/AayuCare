@@ -1,17 +1,16 @@
 import React from 'react';
-import { Volume2, VolumeX, Eye, Languages, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Languages, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const AccessibilityBar: React.FC = () => {
-  const { accessibility, toggleHighContrast, setFontSize, toggleSpeech, toggleLanguage } = useApp();
+  const { accessibility, setFontSize, toggleSpeech, toggleLanguage } = useApp();
 
   return (
     <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-4 py-2 border-b border-slate-700/60 shadow-sm">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-sm">
         
-        {/* Left: Senior Accessibility Helper Label */}
+        {/* Left: Senior Accessibility Helper Label (No pulsing dot) */}
         <div className="flex items-center gap-2 font-medium">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="text-slate-300">
             {accessibility.language === 'hi' ? 'वरिष्ठ सुगमता नियंत्रण (Accessibility)' : 'Senior Accessibility Bar'}
           </span>
@@ -23,21 +22,6 @@ export const AccessibilityBar: React.FC = () => {
         {/* Right: Quick Accessibility Controls */}
         <div className="flex items-center flex-wrap gap-2">
           
-          {/* High Contrast Toggle */}
-          <button
-            onClick={toggleHighContrast}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all shadow-sm ${
-              accessibility.highContrast
-                ? 'bg-yellow-400 text-black ring-2 ring-yellow-300 font-bold'
-                : 'bg-slate-700 hover:bg-slate-600 text-slate-100'
-            }`}
-            title="Toggle High Contrast Mode"
-            aria-pressed={accessibility.highContrast}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>{accessibility.highContrast ? 'High Contrast ON' : 'High Contrast'}</span>
-          </button>
-
           {/* Font Scaling Buttons */}
           <div className="flex items-center bg-slate-700/80 rounded-md p-0.5 border border-slate-600">
             <button
@@ -81,7 +65,7 @@ export const AccessibilityBar: React.FC = () => {
           >
             {accessibility.speechEnabled ? (
               <>
-                <Volume2 className="w-3.5 h-3.5 text-teal-300 animate-pulse" />
+                <Volume2 className="w-3.5 h-3.5 text-teal-300" />
                 <span>Audio ON</span>
               </>
             ) : (
@@ -106,4 +90,3 @@ export const AccessibilityBar: React.FC = () => {
     </div>
   );
 };
-

@@ -123,11 +123,11 @@ export const AddMedicationModal: React.FC<{ isOpen: boolean; onClose: () => void
           </div>
         </div>
 
-        {/* Quick Test Presets for Hackathon Evaluators */}
+        {/* Clinical Safety Validation Presets */}
         <div className="my-4 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Hackathon Quick-Test Presets:</span>
+            <span>Clinical Safety Validation Presets:</span>
           </p>
           <div className="flex flex-wrap gap-2 text-xs">
             <button

@@ -74,7 +74,7 @@ export const NotificationCenter: React.FC = () => {
               </div>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full font-bold">
-                  Simulated Telemetry (Hackathon Mock • Zero Cost)
+                  Automated Carrier Telemetry (Simulated Gateway)
                 </span>
               </div>
             </div>
@@ -86,7 +86,7 @@ export const NotificationCenter: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick Simulation Bar for Hackathon Judges */}
+          {/* Proactive Escalation Simulation Bar */}
           <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/60">
             <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Send className="w-3.5 h-3.5" />

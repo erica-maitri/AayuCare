@@ -10,8 +10,9 @@ interface BigPillCardProps {
 }
 
 export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTimeFilter }) => {
-  const { markDoseTaken } = useApp();
+  const { markDoseTaken, accessibility } = useApp();
   const isTaken = medication.takenToday?.[currentTimeFilter];
+  const isHindi = accessibility.language === 'hi';
 
   const scheduledTime =
     currentTimeFilter === 'Morning'
@@ -31,16 +32,23 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
       ? 'शाम'
       : 'रात';
 
-  // Always speaks prescription out loud in fluent Hindi for elderly comprehension
-  const handleReadAloudInHindi = () => {
-    const spokenName = medication.brandName || medication.name;
-    const hindiInstruction = medication.hindiInstructions || medication.instructions;
-    const hindiSpeech = `दवा का नाम ${spokenName} है। खुराक ${medication.dosage}। समय ${timeHindi}। निर्देश: ${hindiInstruction}।`;
-    
-    speechService.speak(hindiSpeech, {
-      lang: 'hi-IN',
-      rate: 0.82
-    });
+  // Speaks in English when in English mode; speaks in Hindi when in Hindi mode
+  const handleReadAloud = () => {
+    if (isHindi) {
+      const spokenName = medication.brandName || medication.name;
+      const hindiInstruction = medication.hindiInstructions || medication.instructions;
+      const hindiSpeech = `दवा का नाम ${spokenName} है। खुराक ${medication.dosage}। समय ${timeHindi}। निर्देश: ${hindiInstruction}।`;
+      speechService.speak(hindiSpeech, {
+        lang: 'hi-IN',
+        rate: 0.82
+      });
+    } else {
+      const englishSpeech = `Medicine: ${medication.name}. Dosage: ${medication.dosage}. Scheduled for ${currentTimeFilter} at ${scheduledTime}. Instructions: ${medication.instructions}.`;
+      speechService.speak(englishSpeech, {
+        lang: 'en-IN',
+        rate: 0.85
+      });
+    }
   };
 
   return (
@@ -53,9 +61,9 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
     >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         
-        {/* Left: Clean English Prescription Details */}
+        {/* Left: Clean Prescription Details */}
         <div className="flex items-start gap-4 sm:gap-5 flex-1 text-left">
-          {/* Large Pill Icon with dynamic shape & color */}
+          {/* Pill Icon with dynamic color */}
           <div
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex-shrink-0 flex items-center justify-center border-4 border-slate-300 dark:border-slate-600 shadow-md"
             style={{ backgroundColor: medication.color || '#ffffff' }}
@@ -90,34 +98,40 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
               </span>
             </div>
 
-            {/* Clear English Directions Box */}
+            {/* Clear Directions Box */}
             <div className="bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-200 dark:border-amber-900/60 rounded-2xl p-3.5 sm:p-4 text-slate-800 dark:text-slate-200 mt-2">
               <div className="flex items-start gap-2.5 font-bold text-sm sm:text-base text-amber-950 dark:text-amber-200">
                 <Droplets className="w-5 h-5 text-sky-500 flex-shrink-0 mt-0.5" />
-                <span>Directions: {medication.instructions}</span>
+                <span>
+                  {isHindi
+                    ? `निर्देश: ${medication.hindiInstructions || medication.instructions}`
+                    : `Directions: ${medication.instructions}`}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right: Actions (Read Aloud in Hindi & Big Green I Took My Medicine Button) */}
+        {/* Right: Actions (Read Aloud Synchronized with Mode & Big Green I Took My Medicine Button) */}
         <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-64 flex-shrink-0">
           
-          {/* Read Aloud in Hindi Button */}
+          {/* Read Aloud Button */}
           <button
-            onClick={handleReadAloudInHindi}
+            onClick={handleReadAloud}
             className="w-full py-3.5 px-4 rounded-2xl bg-sky-100 dark:bg-sky-950/70 hover:bg-sky-200 dark:hover:bg-sky-900 text-sky-950 dark:text-sky-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-sky-300 dark:border-sky-800 transition-all active:scale-98 shadow-sm"
-            title="Read prescription instructions out loud in Hindi"
+            title="Read prescription instructions out loud"
           >
-            <Volume2 className="w-4 h-4 text-sky-600 dark:text-sky-400 animate-pulse" />
-            <span>Read in Hindi (हिंदी में सुनें)</span>
+            <Volume2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+            <span>
+              {isHindi ? 'पर्चा सुनें (हिंदी में)' : 'Read Prescription (English)'}
+            </span>
           </button>
 
           {/* Big Green "I Took My Medicine" Button */}
           {isTaken ? (
             <div className="w-full py-4 px-4 rounded-2xl bg-emerald-600 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md">
               <Check className="w-5 h-5 stroke-[3]" />
-              <span>Taken Successfully ✓</span>
+              <span>{isHindi ? 'दवा ले ली गई ✓' : 'Taken Successfully ✓'}</span>
             </div>
           ) : (
             <button
@@ -125,7 +139,7 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
               className="w-full py-4 sm:py-5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-base sm:text-lg flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-600/30 border-4 border-emerald-400/80 transition-transform active:scale-95"
             >
               <Check className="w-6 h-6 stroke-[3]" />
-              <span>I TOOK MY MEDICINE</span>
+              <span>{isHindi ? 'मैंने दवा ले ली' : 'I TOOK MY MEDICINE'}</span>
             </button>
           )}
 

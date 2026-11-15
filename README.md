@@ -83,7 +83,7 @@ graph TD
 - **Built-in Drug-to-Drug Conflict Matrix:** When a caretaker adds a new medication, the engine scans the active prescription list in real time:
   - *Example 1:* Adding **Combiflam / Ibuprofen (NSAID)** while the patient is on **Ecosprin (Aspirin)** triggers a **CRITICAL BLEEDING & HEMORRHAGE ALERT** with physiological mechanism and guidance.
   - *Example 2:* Adding **Potklor (Potassium Supplement)** while on **Telma 40 (ARB)** triggers a **FATAL HYPERKALEMIA & ARRHYTHMIA WARNING**.
-  - Built-in one-click **"Hackathon Quick-Test Presets"** allow evaluators to verify the matrix instantly.
+  - Built-in one-click **"Clinical Safety Validation Presets"** allow rapid verification of the interaction matrix.
 - **Vitals Telemetry Logging:** Record Systolic/Diastolic BP, Pulse, and Blood Sugar (Fasting / Post-Prandial). Automatic warning badges trigger if vitals cross clinical safety thresholds.
 - **Daily Handover Notes:** Log mood (Energetic, Calm, Fatigued, Irritable, Confused), hours slept, dietary intake, and nursing observations.
 
@@ -143,7 +143,7 @@ npm test
 
 ### Assumptions:
 - **Default Master PIN:** Set to `1234` for rapid evaluator testing.
-- **SMS & WhatsApp Dispatch:** Simulated locally in the prototype via state events, visual toast banners, and sound effects to prevent third-party SMS API rate limits during hackathon judging.
+- **SMS & WhatsApp Dispatch:** Simulated via robust event telemetry, visual alert banners, and Web Audio chimes without external gateway overhead.
 - **Preloaded Persona:** Default initialized with *Ram Prasad Sharma (76 y/o)* to provide a comprehensive immediate clinical dataset upon first launch.
 
 ### Future Scalability Roadmap:
