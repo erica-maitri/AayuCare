@@ -127,3 +127,4 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
     </div>
   );
 };
+

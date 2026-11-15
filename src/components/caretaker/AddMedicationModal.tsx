@@ -377,3 +377,4 @@ export const AddMedicationModal: React.FC<{ isOpen: boolean; onClose: () => void
     </div>
   );
 };
+

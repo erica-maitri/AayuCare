@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Bell, AlertTriangle, UserCheck, Stethoscope, HeartHandshake, PhoneCall } from 'lucide-react';
+import { Shield, Bell, AlertTriangle, UserCheck, Stethoscope, HeartHandshake, PhoneCall, Bot, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Role } from '../../types';
 
@@ -10,6 +10,7 @@ export const Header: React.FC = () => {
     patient,
     activeNotificationCount,
     setNotificationDrawerOpen,
+    setAssistantModalOpen,
     triggerSos,
     accessibility
   } = useApp();
@@ -63,11 +64,19 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Right: SOS & Notification Quick Buttons */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Right: Assistant, SOS & Notification Quick Buttons */}
+          <div className="flex items-center gap-1.5 md:hidden">
+            <button
+              onClick={() => setAssistantModalOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg text-xs font-bold flex items-center shadow-sm"
+              title="AayuMitra AI Assistant"
+            >
+              <Bot className="w-4 h-4" />
+            </button>
+
             <button
               onClick={triggerSos}
-              className="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 animate-pulse"
+              className="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 animate-pulse"
               title="Emergency SOS"
             >
               <AlertTriangle className="w-3.5 h-3.5" />
@@ -118,8 +127,18 @@ export const Header: React.FC = () => {
           })}
         </div>
 
-        {/* Right Desktop: Patient Pill, Notification Bell & SOS */}
+        {/* Right Desktop: Assistant, Patient Pill, Notification Bell & SOS */}
         <div className="hidden md:flex items-center gap-3">
+          {/* AayuMitra Smart Assistant Trigger */}
+          <button
+            onClick={() => setAssistantModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-md shadow-emerald-600/20 transition-transform active:scale-95"
+            title="Open Context-Aware AI Health Assistant"
+          >
+            <Bot className="w-4 h-4 text-yellow-300 animate-pulse" />
+            <span>{isHindi ? 'आर्यू मित्र AI' : 'AayuMitra AI'}</span>
+          </button>
+
           {/* Patient Quick Pill */}
           <div className="flex items-center gap-2.5 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 px-3 py-1.5 rounded-xl">
             <div className="w-8 h-8 rounded-full bg-emerald-200 dark:bg-emerald-800 flex items-center justify-center text-emerald-800 dark:text-emerald-200 font-bold text-xs">
@@ -164,3 +183,4 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+

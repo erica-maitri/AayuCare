@@ -5,13 +5,14 @@ import { Header } from './components/common/Header';
 import { PinModal } from './components/common/PinModal';
 import { NotificationCenter } from './components/common/NotificationCenter';
 import { EmergencySosModal } from './components/common/EmergencySosModal';
+import { SmartAssistantModal } from './components/common/SmartAssistantModal';
 import { ElderDashboard } from './components/elder/ElderDashboard';
 import { CaretakerDashboard } from './components/caretaker/CaretakerDashboard';
 import { FamilyDashboard } from './components/family/FamilyDashboard';
 import { ShieldCheck, Heart, Sparkles, AlertCircle } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
-  const { role, accessibility } = useApp();
+  const { role, accessibility, assistantModalOpen, setAssistantModalOpen } = useApp();
 
   const fontSizeClass =
     accessibility.fontSize === 'huge'
@@ -67,6 +68,10 @@ const MainLayout: React.FC = () => {
       <PinModal />
       <NotificationCenter />
       <EmergencySosModal />
+      <SmartAssistantModal
+        isOpen={assistantModalOpen}
+        onClose={() => setAssistantModalOpen(false)}
+      />
 
     </div>
   );
@@ -81,3 +86,4 @@ export function App() {
 }
 
 export default App;
+

@@ -130,3 +130,4 @@ export const EmergencySosModal: React.FC = () => {
     </div>
   );
 };
+

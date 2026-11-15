@@ -106,3 +106,4 @@ export const AccessibilityBar: React.FC = () => {
     </div>
   );
 };
+

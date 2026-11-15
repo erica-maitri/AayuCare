@@ -505,3 +505,4 @@ export const INITIAL_CARETAKER_NOTES: CaretakerNote[] = [
     observations: 'Complained of sleeplessness due to festival crackers outside. Monitored BP closely. Gave warm turmeric milk before sleep.'
   }
 ];
+

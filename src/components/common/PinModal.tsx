@@ -145,3 +145,4 @@ export const PinModal: React.FC = () => {
     </div>
   );
 };
+

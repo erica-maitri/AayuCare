@@ -204,3 +204,4 @@ export const AddAppointmentModal: React.FC<{ isOpen: boolean; onClose: () => voi
     </div>
   );
 };
+

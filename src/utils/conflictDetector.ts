@@ -76,3 +76,4 @@ export function checkDrugConflicts(
   const severityRank: Record<string, number> = { CRITICAL: 1, HIGH: 2, MODERATE: 3 };
   return alerts.sort((a, b) => (severityRank[a.rule.severity] || 99) - (severityRank[b.rule.severity] || 99));
 }
+

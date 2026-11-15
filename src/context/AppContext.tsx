@@ -66,6 +66,9 @@ interface AppContextType {
   setNotificationDrawerOpen: (open: boolean) => void;
   activeNotificationCount: number;
 
+  assistantModalOpen: boolean;
+  setAssistantModalOpen: (open: boolean) => void;
+
   readAloud: (text: string, hindiText?: string) => void;
 }
 
@@ -88,6 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isSosActive, setIsSosActive] = useState<boolean>(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState<boolean>(false);
+  const [assistantModalOpen, setAssistantModalOpen] = useState<boolean>(false);
 
   const [accessibility, setAccessibility] = useState<AccessibilitySettings>({
     highContrast: false,
@@ -399,6 +403,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notificationDrawerOpen,
         setNotificationDrawerOpen,
         activeNotificationCount,
+        assistantModalOpen,
+        setAssistantModalOpen,
         readAloud
       }}
     >
@@ -414,3 +420,4 @@ export const useApp = () => {
   }
   return context;
 };
+

@@ -85,3 +85,4 @@ export function calculateAdherenceMetrics(logs: AdherenceDayLog[]): AdherenceMet
     riskColor
   };
 }
+

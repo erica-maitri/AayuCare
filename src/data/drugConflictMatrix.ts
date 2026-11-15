@@ -118,3 +118,4 @@ export const DRUG_CLASSIFICATION_MAP: Record<string, string[]> = {
   // Calcium
   'calcium supplement': ['calcium carbonate', 'calcium citrate', 'shelcal', 'cipcal']
 };
+

@@ -125,3 +125,4 @@ export const EscalationLogs: React.FC = () => {
     </div>
   );
 };
+

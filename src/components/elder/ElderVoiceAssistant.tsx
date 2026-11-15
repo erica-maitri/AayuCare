@@ -111,3 +111,4 @@ export const ElderVoiceAssistant: React.FC<{ isOpen: boolean; onClose: () => voi
     </div>
   );
 };
+

@@ -124,3 +124,4 @@ export const AdherenceCalendar: React.FC = () => {
     </div>
   );
 };
+
