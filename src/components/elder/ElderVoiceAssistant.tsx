@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Mic, Sparkles, X, Play, Square } from 'lucide-react';
+import { Mic, X, Play, Square, Volume2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { speechService } from '../../utils/speech';
 
@@ -7,30 +7,31 @@ export const ElderVoiceAssistant: React.FC<{ isOpen: boolean; onClose: () => voi
   isOpen,
   onClose
 }) => {
-  const { patient, medications, accessibility } = useApp();
+  const { patient, medications } = useApp();
   const [speaking, setSpeaking] = useState(false);
 
   if (!isOpen) return null;
 
-  const isHindi = accessibility.language === 'hi';
+  const morningMeds = medications.filter(m => m.schedule.includes('Morning'));
+  const afternoonMeds = medications.filter(m => m.schedule.includes('Afternoon'));
+  const nightMeds = medications.filter(m => m.schedule.includes('Night'));
 
-  const generateFullSummary = () => {
-    const morningMeds = medications.filter(m => m.schedule.includes('Morning'));
-    const afternoonMeds = medications.filter(m => m.schedule.includes('Afternoon'));
-    const nightMeds = medications.filter(m => m.schedule.includes('Night'));
+  // On-screen text is in clean, professional English
+  const englishDisplaySummary = `Hello ${patient.fullName} ji! Here is your medication routine for today:
 
-    if (isHindi) {
-      return `नमस्ते ${patient.fullName} जी! आज के लिए आपकी दवाएं इस प्रकार हैं: सुबह के समय आपको ${morningMeds.map(m => m.name).join(' और ')} लेनी है। दोपहर के भोजन के बाद ${afternoonMeds.map(m => m.name).join(' और ')}। और रात को सोने से पहले ${nightMeds.map(m => m.name).join(' और ')}। कृपया सभी दवाएं गुनगुने पानी के साथ समय पर लें।`;
-    }
+• Morning (08:30 AM): ${morningMeds.map(m => `${m.name} (${m.dosage})`).join(', ')}
+• Afternoon (01:30 PM): ${afternoonMeds.map(m => `${m.name} (${m.dosage})`).join(', ')}
+• Night (09:00 PM): ${nightMeds.map(m => `${m.name} (${m.dosage})`).join(', ')}
 
-    return `Hello ${patient.fullName} ji! Here is your medication overview for today. In the morning, you have ${morningMeds.map(m => m.name).join(' and ')}. In the afternoon after lunch, you have ${afternoonMeds.map(m => m.name).join(' and ')}. And at night before bedtime, you have ${nightMeds.map(m => m.name).join(' and ')}. Remember to take your medicines with warm water.`;
-  };
+Please take all tablets with warm water as directed.`;
+
+  // Spoken voice is always in natural Hindi for senior citizen comprehension
+  const hindiVoiceSpeech = `नमस्ते ${patient.fullName} जी! आज के लिए आपकी दवाएं इस प्रकार हैं: सुबह के समय आपको ${morningMeds.map(m => m.brandName || m.name).join(', ')} लेनी है। दोपहर के भोजन के बाद ${afternoonMeds.map(m => m.brandName || m.name).join(', ')}। और रात को सोने से पहले ${nightMeds.map(m => m.brandName || m.name).join(', ')}। कृपया सभी दवाएं गुनगुने पानी के साथ समय पर लें।`;
 
   const handleSpeak = () => {
-    const speechText = generateFullSummary();
     setSpeaking(true);
-    speechService.speak(speechText, {
-      lang: isHindi ? 'hi-IN' : 'en-IN',
+    speechService.speak(hindiVoiceSpeech, {
+      lang: 'hi-IN',
       rate: 0.82,
       onEnd: () => setSpeaking(false),
       onError: () => setSpeaking(false)
@@ -58,9 +59,9 @@ export const ElderVoiceAssistant: React.FC<{ isOpen: boolean; onClose: () => voi
         </button>
 
         {/* Animated Assistant Avatar */}
-        <div className="relative w-24 h-24 mx-auto mb-4">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-500 flex items-center justify-center text-white shadow-xl shadow-emerald-500/30">
-            <Mic className="w-12 h-12 animate-pulse" />
+        <div className="relative w-20 h-20 mx-auto mb-3">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-500 flex items-center justify-center text-white shadow-xl shadow-emerald-500/30">
+            <Mic className="w-10 h-10 animate-pulse" />
           </div>
           {speaking && (
             <span className="absolute -top-1 -right-1 flex h-6 w-6">
@@ -72,18 +73,21 @@ export const ElderVoiceAssistant: React.FC<{ isOpen: boolean; onClose: () => voi
           )}
         </div>
 
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white">
-          {isHindi ? 'आर्यू केयर वॉइस असिस्टेंट' : 'AayuCare Voice Assistant'}
+        <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+          AayuCare Voice Prescription Assistant
         </h3>
-        <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-          {isHindi ? 'नमस्ते राम प्रसाद जी 🙏' : 'Namaste Ram Prasad ji 🙏'}
+        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+          नमस्ते राम प्रसाद जी 🙏 • Reads Prescription Aloud in Hindi
         </p>
 
-        {/* Speech Bubble */}
-        <div className="my-5 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-left text-sm sm:text-base leading-relaxed text-slate-800 dark:text-slate-200 shadow-inner max-h-60 overflow-y-auto">
-          <p className="font-medium">
-            {generateFullSummary()}
-          </p>
+        {/* English Prescription Overview Card */}
+        <div className="my-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-left text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-200 shadow-inner max-h-56 overflow-y-auto whitespace-pre-line font-medium">
+          {englishDisplaySummary}
+        </div>
+
+        <div className="text-[11px] text-slate-500 mb-4 flex items-center justify-center gap-1.5 font-semibold">
+          <Volume2 className="w-3.5 h-3.5 text-emerald-600" />
+          <span>English Prescription • Spoken Voice in Hindi (हिंदी ऑडियो)</span>
         </div>
 
         {/* Voice Controls */}
@@ -91,18 +95,18 @@ export const ElderVoiceAssistant: React.FC<{ isOpen: boolean; onClose: () => voi
           {!speaking ? (
             <button
               onClick={handleSpeak}
-              className="py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-transform active:scale-95"
+              className="py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-transform active:scale-95"
             >
               <Play className="w-5 h-5 fill-current" />
-              <span>{isHindi ? 'आवाज़ में सुनें (Play Audio)' : 'Listen Prescription Audio'}</span>
+              <span>Listen in Hindi (हिंदी में सुनें)</span>
             </button>
           ) : (
             <button
               onClick={handleStop}
-              className="py-4 px-6 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-base flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-transform active:scale-95"
+              className="py-3.5 px-6 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-transform active:scale-95"
             >
               <Square className="w-5 h-5 fill-current" />
-              <span>{isHindi ? 'आवाज़ बंद करें (Stop)' : 'Stop Audio'}</span>
+              <span>Stop Audio (बंद करें)</span>
             </button>
           )}
         </div>
@@ -111,4 +115,3 @@ export const ElderVoiceAssistant: React.FC<{ isOpen: boolean; onClose: () => voi
     </div>
   );
 };
-

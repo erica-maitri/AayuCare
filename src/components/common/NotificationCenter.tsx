@@ -72,9 +72,11 @@ export const NotificationCenter: React.FC = () => {
                   {isHindi ? 'स्वचालित सूचना केंद्र (Escalations)' : 'Automated Alert & Escalation Hub'}
                 </h3>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {isHindi ? 'परिवार व देखभालकर्ता को भेजे गए लाइव संदेश' : 'Real-time SMS & WhatsApp alerts dispatched to family'}
-              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                  Simulated Telemetry (Hackathon Mock • Zero Cost)
+                </span>
+              </div>
             </div>
             <button
               onClick={() => setNotificationDrawerOpen(false)}

@@ -19,11 +19,16 @@ export const EscalationLogs: React.FC = () => {
             <Bell className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-              Automated Family Alert & Escalation Feed
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                Automated Family Alert & Escalation Feed
+              </h3>
+              <span className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold px-2 py-0.5 rounded-full border border-amber-300 hidden sm:inline-block">
+                Simulated Mock Telemetry
+              </span>
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Audit trail of simulated SMS & WhatsApp transmissions dispatched to family members
+              Audit trail of simulated SMS & WhatsApp transmissions dispatched to family members (Zero SMS Cost)
             </p>
           </div>
         </div>
