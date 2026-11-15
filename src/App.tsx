@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AccessibilityBar } from './components/common/AccessibilityBar';
 import { Header } from './components/common/Header';
 import { PinModal } from './components/common/PinModal';
@@ -79,9 +80,11 @@ const MainLayout: React.FC = () => {
 
 export function App() {
   return (
-    <AppProvider>
-      <MainLayout />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <MainLayout />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
 

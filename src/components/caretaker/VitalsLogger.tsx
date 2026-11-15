@@ -208,7 +208,7 @@ export const VitalsLogger: React.FC = () => {
               </label>
               <select
                 value={context}
-                onChange={e => setContext(e.target.value as any)}
+                onChange={e => setContext(e.target.value as 'fasting' | 'post_prandial' | 'random')}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium"
               >
                 <option value="fasting">Fasting (Morning)</option>

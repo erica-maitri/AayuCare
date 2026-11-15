@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8.svg?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.0-646cff.svg?style=for-the-badge&logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Vitest-5%2F5_Passing-brightgreen.svg?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Vitest-12%2F12_Passing-brightgreen.svg?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 [![Accessibility](https://img.shields.io/badge/WCAG_AAA-Compliant-emerald.svg?style=for-the-badge)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 
 > 🌐 **Live Deployed Application:** [https://aayu-care.vercel.app/](https://aayu-care.vercel.app/)  
@@ -130,13 +130,20 @@ AayuCare implements high-impact accessibility features designed specifically for
 
 ---
 
-## 6. Automated Testing Suite
+## 6. Automated Testing Suite & Security Hardening
 
-AayuCare includes a comprehensive test suite powered by **Vitest**:
-- **`src/__tests__/drugConflict.test.ts`**:
+AayuCare includes an extensive test suite powered by **Vitest** (12 automated unit tests across 4 test suites):
+- **`src/__tests__/drugConflict.test.ts` & `drugConflictExtended.test.ts`**:
   - Validates detection of CRITICAL NSAID vs Aspirin interactions.
   - Validates detection of CRITICAL Potassium vs ARB interactions.
+  - Validates detection of HIGH Statin + Macrolide interactions.
+  - Validates detection of HIGH Metformin + Contrast interactions.
+  - Validates detection of MODERATE Levothyroxine + Calcium interactions.
   - Validates 0 false-positives for safe supplements (Vitamin C).
+- **`src/__tests__/vitals.test.ts`**:
+  - Validates stage-2 critical hypertension classifications.
+  - Validates stage-1 warning classifications.
+  - Validates automated XSS sanitization and script stripping.
 - **`src/__tests__/adherence.test.ts`**:
   - Validates 7-day adherence calculations, streaks, and grading.
   - Validates edge cases (100% adherence, zero logs).
@@ -145,7 +152,7 @@ Run tests locally:
 ```bash
 npm test
 ```
-*Result: 5 of 5 tests passing in 1.34s.*
+*Result: 12 of 12 tests passing.*
 
 ---
 

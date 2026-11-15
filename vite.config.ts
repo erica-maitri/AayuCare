@@ -6,6 +6,18 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': ['lucide-react', 'canvas-confetti']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 600
   }
 });
-

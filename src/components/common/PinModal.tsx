@@ -3,7 +3,7 @@ import { Lock, X, Check, KeyRound, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const PinModal: React.FC = () => {
-  const { pinModalOpen, setPinModalOpen, targetRoleForPin, confirmRoleSwitch, accessibility } = useApp();
+  const { pinModalOpen, setPinModalOpen, targetRoleForPin, confirmRoleSwitch, isLockedOut, accessibility } = useApp();
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
 
@@ -92,7 +92,13 @@ export const PinModal: React.FC = () => {
           ))}
         </div>
 
-        {error && (
+        {isLockedOut && (
+          <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 text-rose-800 dark:text-rose-200 text-xs font-bold mb-4 animate-pulse">
+            🔒 Security Lockout Active: Too many failed PIN attempts. Please wait 30 seconds.
+          </div>
+        )}
+
+        {error && !isLockedOut && (
           <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-rose-600 mb-4 animate-bounce">
             <AlertCircle className="w-4 h-4" />
             <span>{isHindi ? 'गलत पिन! पुनः प्रयास करें।' : 'Incorrect PIN! Try default PIN 1234.'}</span>

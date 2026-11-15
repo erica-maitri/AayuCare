@@ -72,7 +72,7 @@ export const DailyNotes: React.FC = () => {
               </label>
               <select
                 value={mood}
-                onChange={e => setMood(e.target.value as any)}
+                onChange={e => setMood(e.target.value as CaretakerNote['mood'])}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium"
               >
                 <option value="Energetic">Energetic 😊</option>
@@ -104,7 +104,7 @@ export const DailyNotes: React.FC = () => {
               </label>
               <select
                 value={dietIntake}
-                onChange={e => setDietIntake(e.target.value as any)}
+                onChange={e => setDietIntake(e.target.value as CaretakerNote['dietIntake'])}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium"
               >
                 <option value="Full Meal">Full Meal (Good Appetite)</option>

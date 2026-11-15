@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Role,
@@ -23,6 +23,7 @@ import {
 } from '../data/dataset';
 import { soundEffects } from '../utils/sound';
 import { speechService } from '../utils/speech';
+import { sanitizeInput, classifyVitals } from '../utils/sanitizer';
 
 interface AppContextType {
   role: Role;
@@ -32,6 +33,8 @@ interface AppContextType {
   targetRoleForPin: Role | null;
   requestRoleSwitch: (role: Role) => void;
   confirmRoleSwitch: (pin: string) => boolean;
+  failedPinAttempts: number;
+  isLockedOut: boolean;
 
   patient: PatientProfile;
   medications: Medication[];
@@ -75,11 +78,16 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const MASTER_PIN = '1234';
+const MAX_FAILED_ATTEMPTS = 5;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<Role>('elder');
   const [pinModalOpen, setPinModalOpen] = useState<boolean>(false);
   const [targetRoleForPin, setTargetRoleForPin] = useState<Role | null>(null);
+
+  // Security: Brute-force protection with lockout
+  const [failedPinAttempts, setFailedPinAttempts] = useState<number>(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   const [patient] = useState<PatientProfile>(INITIAL_PATIENT);
   const [medications, setMedications] = useState<Medication[]>(INITIAL_MEDICATIONS);
@@ -100,49 +108,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     language: 'en'
   });
 
-  // Apply high-contrast class to root body
-  useEffect(() => {
-    if (accessibility.highContrast) {
-      document.documentElement.classList.add('high-contrast');
-    } else {
-      document.documentElement.classList.remove('high-contrast');
-    }
-  }, [accessibility.highContrast]);
+  // Check lockout status
+  const isLockedOut = useMemo(() => {
+    if (!lockedUntil) return false;
+    return Date.now() < lockedUntil;
+  }, [lockedUntil]);
 
-  const requestRoleSwitch = (newRole: Role) => {
+  const requestRoleSwitch = useCallback((newRole: Role) => {
     if (newRole === role) return;
     if (newRole === 'elder') {
-      // Switching to elder view requires no barrier for elderly user ease
       setRole('elder');
     } else {
-      // Caretaker or Family views require simple 4-digit PIN (1234)
       setTargetRoleForPin(newRole);
       setPinModalOpen(true);
     }
-  };
+  }, [role]);
 
-  const confirmRoleSwitch = (pin: string): boolean => {
+  const confirmRoleSwitch = useCallback((pin: string): boolean => {
+    if (isLockedOut) {
+      soundEffects.playWarningBuzz();
+      return false;
+    }
+
     if (pin === MASTER_PIN && targetRoleForPin) {
       setRole(targetRoleForPin);
       setPinModalOpen(false);
       setTargetRoleForPin(null);
+      setFailedPinAttempts(0);
+      setLockedUntil(null);
       soundEffects.playSuccessChime();
       return true;
     }
+
+    // Failed attempt increment
+    setFailedPinAttempts(prev => {
+      const next = prev + 1;
+      if (next >= MAX_FAILED_ATTEMPTS) {
+        setLockedUntil(Date.now() + 30000); // 30 second security lockout
+      }
+      return next;
+    });
+
     soundEffects.playWarningBuzz();
     return false;
-  };
+  }, [isLockedOut, targetRoleForPin]);
 
-  const readAloud = (text: string, hindiText?: string) => {
+  const readAloud = useCallback((text: string, hindiText?: string) => {
     if (!accessibility.speechEnabled) return;
     const content = accessibility.language === 'hi' && hindiText ? hindiText : text;
     speechService.speak(content, {
-      lang: accessibility.language === 'hi' ? 'hi-IN' : 'en-IN'
+      lang: accessibility.language === 'hi' ? 'hi-IN' : 'en-US'
     });
-  };
+  }, [accessibility.speechEnabled, accessibility.language]);
 
-  const markDoseTaken = (medicationId: string, timeOfDay: TimeOfDay) => {
-    // 1. Play auditory chime and visual confetti
+  const addEscalation = useCallback((escData: Omit<EscalationLog, 'id' | 'timestamp'>) => {
+    const newEsc: EscalationLog = {
+      ...escData,
+      message: sanitizeInput(escData.message),
+      id: `esc-${Date.now()}`,
+      timestamp: `Just now (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
+    };
+    setEscalations(prev => [newEsc, ...prev]);
+  }, []);
+
+  const markDoseTaken = useCallback((medicationId: string, timeOfDay: TimeOfDay) => {
     soundEffects.playSuccessChime();
     try {
       confetti({
@@ -152,10 +181,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         colors: ['#16a34a', '#22c55e', '#86efac', '#eab308']
       });
     } catch {
-      // fallback safe
+      // safe fallback
     }
 
-    // 2. Update medication takenToday state & remaining pill count
     let updatedMedName = '';
     setMedications(prev =>
       prev.map(med => {
@@ -176,7 +204,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
 
-    // 3. Update adherence logs
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setAdherenceLogs(prev => {
       const today = prev[0];
@@ -197,57 +224,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ];
     });
 
-    // 4. Voice confirmation
     if (accessibility.speechEnabled) {
       const msg = accessibility.language === 'hi'
         ? `शाबाश! आपने ${updatedMedName} ले ली है।`
-        : `Well done! You have marked ${updatedMedName} as taken.`;
+        : `Well done! You marked ${updatedMedName} as taken.`;
       readAloud(msg, msg);
     }
-  };
+  }, [accessibility.speechEnabled, accessibility.language, readAloud]);
 
-  const addMedication = (newMed: Omit<Medication, 'id' | 'takenToday'>) => {
+  const addMedication = useCallback((newMed: Omit<Medication, 'id' | 'takenToday'>) => {
     const id = `med-${Date.now()}`;
-    const completeMed: Medication = {
+    const sanitizedMed: Medication = {
       ...newMed,
+      name: sanitizeInput(newMed.name),
+      activeIngredient: sanitizeInput(newMed.activeIngredient),
+      instructions: sanitizeInput(newMed.instructions),
+      hindiInstructions: newMed.hindiInstructions ? sanitizeInput(newMed.hindiInstructions) : undefined,
+      purpose: sanitizeInput(newMed.purpose),
       id,
       takenToday: {}
     };
 
-    setMedications(prev => [completeMed, ...prev]);
+    setMedications(prev => [sanitizedMed, ...prev]);
     soundEffects.playSuccessChime();
 
-    // Auto-generate notification
     addEscalation({
       type: 'REFILL_ALERT',
       recipientRole: 'family',
       recipientName: 'Priya Sharma (Daughter)',
       recipientContact: '+91 98765 43210',
       channel: 'SMS',
-      message: `[AayuCare Update] New prescription added for Ram Prasad: ${newMed.name} (${newMed.dosage}). Schedule: ${newMed.schedule.join(', ')}.`,
+      message: `[AayuCare Update] New prescription registered for Ram Prasad: ${sanitizedMed.name} (${sanitizedMed.dosage}). Schedule: ${sanitizedMed.schedule.join(', ')}.`,
       status: 'SENT'
     });
-  };
+  }, [addEscalation]);
 
-  const deleteMedication = (id: string) => {
+  const deleteMedication = useCallback((id: string) => {
     setMedications(prev => prev.filter(m => m.id !== id));
-  };
+  }, []);
 
-  const addVital = (vitalData: Omit<VitalSign, 'id' | 'timestamp' | 'status'>) => {
-    const isWarning =
-      vitalData.systolicBP > 140 ||
-      vitalData.diastolicBP > 90 ||
-      vitalData.bloodSugarMgDl > 180;
-
-    const isCritical =
-      vitalData.systolicBP > 160 ||
-      vitalData.diastolicBP > 105 ||
-      vitalData.bloodSugarMgDl > 250;
-
-    const status: VitalSign['status'] = isCritical ? 'critical' : isWarning ? 'warning' : 'normal';
+  const addVital = useCallback((vitalData: Omit<VitalSign, 'id' | 'timestamp' | 'status'>) => {
+    const status = classifyVitals(
+      vitalData.systolicBP,
+      vitalData.diastolicBP,
+      vitalData.bloodSugarMgDl
+    );
 
     const newVital: VitalSign = {
       ...vitalData,
+      notes: vitalData.notes ? sanitizeInput(vitalData.notes) : 'Routine clinical record.',
       id: `vital-${Date.now()}`,
       timestamp: `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
       status
@@ -255,30 +280,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setVitals(prev => [newVital, ...prev]);
 
-    if (isCritical || isWarning) {
+    if (status !== 'normal') {
       soundEffects.playWarningBuzz();
-      // Auto escalate to Family & Caregiver
       addEscalation({
         type: 'CRITICAL_VITAL',
         recipientRole: 'family',
         recipientName: 'Priya Sharma (Daughter)',
         recipientContact: '+91 98765 43210',
         channel: 'WHATSAPP',
-        message: `[AayuCare Vitals Alert] Elevated vitals recorded for Ram Prasad: BP ${vitalData.systolicBP}/${vitalData.diastolicBP} mmHg, Blood Sugar ${vitalData.bloodSugarMgDl} mg/dL. Immediate caregiver check advised.`,
+        message: `[AayuCare Vitals Alert] Elevated measurement for Ram Prasad: BP ${vitalData.systolicBP}/${vitalData.diastolicBP} mmHg, Glucose ${vitalData.bloodSugarMgDl} mg/dL. Prompt review recommended.`,
         status: 'DELIVERED'
       });
     } else {
       soundEffects.playSuccessChime();
     }
-  };
+  }, [addEscalation]);
 
-  const addAppointment = (apptData: Omit<DoctorAppointment, 'id' | 'status'>) => {
+  const addAppointment = useCallback((apptData: Omit<DoctorAppointment, 'id' | 'status'>) => {
     const apptDate = new Date(apptData.appointmentDateTime);
     const now = new Date();
     const diffDays = Math.max(0, Math.ceil((apptDate.getTime() - now.getTime()) / (1000 * 3600 * 24)));
 
     const newAppt: DoctorAppointment = {
       ...apptData,
+      doctorName: sanitizeInput(apptData.doctorName),
+      hospitalName: sanitizeInput(apptData.hospitalName),
+      locationAddress: sanitizeInput(apptData.locationAddress),
+      purpose: sanitizeInput(apptData.purpose),
       id: `appt-${Date.now()}`,
       countdownDays: diffDays,
       status: 'upcoming'
@@ -287,61 +315,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAppointments(prev => [...prev, newAppt]);
     soundEffects.playSuccessChime();
 
-    // Auto escalation to family
     addEscalation({
       type: 'MISSED_DOSE',
       recipientRole: 'family',
       recipientName: 'Priya Sharma (Daughter)',
       recipientContact: '+91 98765 43210',
       channel: 'SMS',
-      message: `[AayuCare Appointment] Confirmed appointment with ${apptData.doctorName} (${apptData.specialty}) at ${apptData.hospitalName} on ${apptDate.toLocaleDateString()}.`,
+      message: `[AayuCare Appointment] Confirmed appointment with ${newAppt.doctorName} (${newAppt.specialty}) at ${newAppt.hospitalName} on ${apptDate.toLocaleDateString()}.`,
       status: 'SENT'
     });
-  };
+  }, [addEscalation]);
 
-  const addEscalation = (escData: Omit<EscalationLog, 'id' | 'timestamp'>) => {
-    const newEsc: EscalationLog = {
-      ...escData,
-      id: `esc-${Date.now()}`,
-      timestamp: `Just now (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
-    };
-    setEscalations(prev => [newEsc, ...prev]);
-  };
-
-  const addCaretakerNote = (noteData: Omit<CaretakerNote, 'id' | 'date'>) => {
+  const addCaretakerNote = useCallback((noteData: Omit<CaretakerNote, 'id' | 'date'>) => {
     const newNote: CaretakerNote = {
       ...noteData,
+      observations: sanitizeInput(noteData.observations),
       id: `note-${Date.now()}`,
       date: `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
     };
     setCaretakerNotes(prev => [newNote, ...prev]);
     soundEffects.playSuccessChime();
-  };
+  }, []);
 
-  const toggleHighContrast = () => {
+  const toggleHighContrast = useCallback(() => {
     setAccessibility(prev => ({ ...prev, highContrast: !prev.highContrast }));
-  };
+  }, []);
 
-  const setFontSize = (fontSize: 'normal' | 'large' | 'huge') => {
+  const setFontSize = useCallback((fontSize: 'normal' | 'large' | 'huge') => {
     setAccessibility(prev => ({ ...prev, fontSize }));
-  };
+  }, []);
 
-  const toggleSpeech = () => {
+  const toggleSpeech = useCallback(() => {
     setAccessibility(prev => {
       const next = !prev.speechEnabled;
       if (!next) speechService.stop();
       return { ...prev, speechEnabled: next };
     });
-  };
+  }, []);
 
-  const toggleLanguage = () => {
+  const toggleLanguage = useCallback(() => {
     setAccessibility(prev => ({
       ...prev,
       language: prev.language === 'en' ? 'hi' : 'en'
     }));
-  };
+  }, []);
 
-  const triggerSos = () => {
+  const triggerSos = useCallback(() => {
     setIsSosActive(true);
     soundEffects.startEmergencySiren();
     addEscalation({
@@ -350,7 +369,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recipientName: 'Priya Sharma (Daughter)',
       recipientContact: '+91 98765 43210',
       channel: 'AUTOMATED_CALL',
-      message: `[AAYUCARE EMERGENCY SOS TRIGGERED] Ram Prasad Sharma pressed the SOS button at C-Block, Greater Kailash-I, New Delhi. Ambulance service (108) and nearby caretaker alerted.`,
+      message: `[AAYUCARE EMERGENCY SOS TRIGGERED] Ram Prasad Sharma activated the emergency SOS distress signal at Greater Kailash-I, New Delhi. First responders alerted.`,
       status: 'SENT'
     });
     if (accessibility.speechEnabled) {
@@ -359,55 +378,92 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : 'Emergency SOS activated. Family and medical assistance are being contacted immediately.';
       readAloud(alertMsg, alertMsg);
     }
-  };
+  }, [accessibility.speechEnabled, accessibility.language, addEscalation, readAloud]);
 
-  const cancelSos = () => {
+  const cancelSos = useCallback(() => {
     setIsSosActive(false);
     soundEffects.stopEmergencySiren();
-  };
+  }, []);
 
   const activeNotificationCount = escalations.length;
 
+  // Memoize entire context value for maximum rendering efficiency
+  const contextValue = useMemo(() => ({
+    role,
+    setRole,
+    pinModalOpen,
+    setPinModalOpen,
+    targetRoleForPin,
+    requestRoleSwitch,
+    confirmRoleSwitch,
+    failedPinAttempts,
+    isLockedOut,
+    patient,
+    medications,
+    markDoseTaken,
+    addMedication,
+    deleteMedication,
+    vitals,
+    addVital,
+    appointments,
+    addAppointment,
+    adherenceLogs,
+    escalations,
+    addEscalation,
+    caretakerNotes,
+    addCaretakerNote,
+    accessibility,
+    toggleHighContrast,
+    setFontSize,
+    toggleSpeech,
+    toggleLanguage,
+    isSosActive,
+    triggerSos,
+    cancelSos,
+    notificationDrawerOpen,
+    setNotificationDrawerOpen,
+    activeNotificationCount,
+    assistantModalOpen,
+    setAssistantModalOpen,
+    readAloud
+  }), [
+    role,
+    pinModalOpen,
+    targetRoleForPin,
+    requestRoleSwitch,
+    confirmRoleSwitch,
+    failedPinAttempts,
+    isLockedOut,
+    patient,
+    medications,
+    markDoseTaken,
+    addMedication,
+    deleteMedication,
+    vitals,
+    addVital,
+    appointments,
+    addAppointment,
+    adherenceLogs,
+    escalations,
+    addEscalation,
+    caretakerNotes,
+    addCaretakerNote,
+    accessibility,
+    toggleHighContrast,
+    setFontSize,
+    toggleSpeech,
+    toggleLanguage,
+    isSosActive,
+    triggerSos,
+    cancelSos,
+    notificationDrawerOpen,
+    activeNotificationCount,
+    assistantModalOpen,
+    readAloud
+  ]);
+
   return (
-    <AppContext.Provider
-      value={{
-        role,
-        setRole,
-        pinModalOpen,
-        setPinModalOpen,
-        targetRoleForPin,
-        requestRoleSwitch,
-        confirmRoleSwitch,
-        patient,
-        medications,
-        markDoseTaken,
-        addMedication,
-        deleteMedication,
-        vitals,
-        addVital,
-        appointments,
-        addAppointment,
-        adherenceLogs,
-        escalations,
-        addEscalation,
-        caretakerNotes,
-        addCaretakerNote,
-        accessibility,
-        toggleHighContrast,
-        setFontSize,
-        toggleSpeech,
-        toggleLanguage,
-        isSosActive,
-        triggerSos,
-        cancelSos,
-        notificationDrawerOpen,
-        setNotificationDrawerOpen,
-        activeNotificationCount,
-        assistantModalOpen,
-        setAssistantModalOpen,
-        readAloud
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
@@ -420,4 +476,3 @@ export const useApp = () => {
   }
   return context;
 };
-
