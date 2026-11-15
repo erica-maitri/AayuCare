@@ -1,14 +1,16 @@
 # आर्यू केयर (AayuCare) — Smart Elderly Health & Medication Hub
 
+[![Live Demo](https://img.shields.io/badge/Live_Application-aayu--care.vercel.app-emerald?style=for-the-badge&logo=vercel)](https://aayu-care.vercel.app/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8.svg?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.0-646cff.svg?style=for-the-badge&logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Vitest-Passing-brightgreen.svg?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Vitest-5%2F5_Passing-brightgreen.svg?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 [![Accessibility](https://img.shields.io/badge/WCAG_AAA-Compliant-emerald.svg?style=for-the-badge)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 
-> **Submission for the "Elderly Care & Medication Management Platform" Challenge**  
-> GitHub Repository: [https://github.com/erica-maitri/AayuCare](https://github.com/erica-maitri/AayuCare)
+> 🌐 **Live Deployed Application:** [https://aayu-care.vercel.app/](https://aayu-care.vercel.app/)  
+> 📁 **GitHub Repository:** [https://github.com/erica-maitri/AayuCare](https://github.com/erica-maitri/AayuCare)  
+> 🏷️ **Challenge Vertical:** Elderly Care & Medication Management Platform
 
 ---
 
@@ -38,9 +40,10 @@ graph TD
     A[AayuCare Hub] --> B[Senior Mode: Zero Barrier UI]
     A --> C[Caretaker Mode: Clinical Console]
     A --> D[Family Mode: Remote Oversight]
+    A --> H[AayuMitra: Context-Aware AI Assistant]
 
     B --> B1[Giant Tap Targets & Color-Coded Pills]
-    B --> B2[Web Speech API: Hindi/English Voice Readout]
+    B --> B2[Web Speech API: Synchronized Audio Readout]
     B --> B3[1-Tap 'I Took My Medicine' Confetti & Sound]
     B --> B4[Emergency SOS: Siren + GPS Dispatch]
 
@@ -54,15 +57,19 @@ graph TD
     D --> D3[Upcoming Doctor Appointments Countdown]
     D --> D4[Direct Phone Links to Caregiver & Doctor]
 
+    H --> H1[Understands Active Drugs & Telemetry]
+    H --> H2[Real-Time Contraindication Guidance]
+
     C2 -.->|Detects Contraindications| E[Clinical Warning Alert]
     B1 -.->|Pill Logged| F[Adherence History & Refill Counter]
-    B3 -.->|Missed Dose / Critical Vital| G[Simulated SMS Escalation]
+    B3 -.->|Missed Dose / Critical Vital| G[Simulated Telemetry Escalation]
 ```
 
 ### Core Architecture Components:
 - **Type-Safe Domain Models (`src/types/index.ts`):** Strict TypeScript contracts for Patients, Medications, Schedules, Drug Interactions, Vitals, Appointments, and Escalations.
 - **Bi-Directional Conflict Detection Engine (`src/utils/conflictDetector.ts`):** Cross-analyzes brand names, chemical active ingredients, and pharmacological classes before any new drug is committed to state.
-- **Adaptive Accessibility Layer (`src/components/common/AccessibilityBar.tsx`):** Runtime toggles for WCAG AAA High Contrast mode, font size scaling (`normal`, `large`, `huge`), browser-native Speech Synthesis (`window.speechSynthesis`), and bilingual translation (English / हिंदी).
+- **Context-Aware AI Assistant — AayuMitra (`src/components/common/SmartAssistantModal.tsx`):** Health assistant cognizant of Ram Prasad's active prescriptions, latest blood pressure, and pending schedule.
+- **Synchronized Speech Engine (`src/utils/speech.ts`):** Web Speech API synthesizer with strict language isolation. Word-by-word deliberate English pronunciation (`0.80x` pace) when viewing in English, and fluent Hindi narration (`0.82x` pace) when viewing in Hindi.
 - **In-Browser Sound Synthesizer (`src/utils/sound.ts`):** Zero-dependency Web Audio API oscillator synthesis generating affirmative chords, reminder chimes, and emergency siren sweeps.
 
 ---
@@ -71,15 +78,18 @@ graph TD
 
 ### 👵 1. Elderly Individual Mode (Senior-First UX)
 - **Zero-Barrier Navigation:** Massive cards (min 60–80px touch targets) with time-of-day tabs:
-  - 🌅 **सुबह (Morning)**
-  - ☀️ **दोपहर (Afternoon)**
-  - 🌙 **रात (Night)**
+  - 🌅 **Morning (सुबह)**
+  - ☀️ **Afternoon (दोपहर)**
+  - 🌙 **Night (रात)**
 - **1-Tap "I Took My Medicine" (मैंने दवा ले ली):** Giant emerald button. When pressed, triggers an uplifting audio chime, visual confetti particles (`canvas-confetti`), updates pill inventory count, and logs adherence timestamp.
-- **Prescription Voice Assistant ("बोलकर पर्चा सुनें"):** Reads prescription directions out loud in clear Hindi or Indian English using browser Web Speech API.
+- **Synchronized Prescription Voice Assistant:** 
+  - When viewing in English: Reads instructions distinctly word-by-word in English (e.g., *"Medicine: Glycomet 500 milligrams. Scheduled for Morning at 08:30 AM..."*).
+  - When viewing in Hindi: Reads instructions naturally in Hindi.
+  - Active audio control allowing the senior to stop reading at any time.
 - **Emergency SOS (आपातकालीन सहायता):** Loud acoustic siren, 5-second accidental press countdown, and automatic broadcast of GPS coordinates, blood group (B+), and critical allergies (Penicillin, Sulfa) to Daughter Priya and Emergency Ambulance (108).
 
 ### 🩺 2. Caretaker Mode (Clinical Console)
-- **Protected by PIN:** Secure 4-digit PIN verification (`1234`) prevents accidental tampering.
+- **Protected by Master PIN:** Secure 4-digit PIN verification (`1234`) prevents accidental tampering.
 - **Built-in Drug-to-Drug Conflict Matrix:** When a caretaker adds a new medication, the engine scans the active prescription list in real time:
   - *Example 1:* Adding **Combiflam / Ibuprofen (NSAID)** while the patient is on **Ecosprin (Aspirin)** triggers a **CRITICAL BLEEDING & HEMORRHAGE ALERT** with physiological mechanism and guidance.
   - *Example 2:* Adding **Potklor (Potassium Supplement)** while on **Telma 40 (ARB)** triggers a **FATAL HYPERKALEMIA & ARRHYTHMIA WARNING**.
@@ -92,7 +102,7 @@ graph TD
 - **7-Day Compliance History Grid:** Visual day-by-day status breakdown (Taken, Missed, Snoozed) with consecutive streak counter.
 - **Upcoming Doctor Appointments Countdown:** Displays specialist name, hospital location, and checklist prep notes (e.g. *"10-12 hr fasting before blood test"*, *"Carry previous ECG"*).
 - **Automated Escalation Log Feed:** Complete audit trail of simulated automated SMS and WhatsApp dispatches sent to Daughter Priya when doses are missed or vitals are elevated.
-- **Interactive Simulation Controls:** Evaluators can click `+ Missed Dose SMS`, `+ High BP WhatsApp`, or `+ Pharmacy Refill` to witness real-time notification engine dispatches.
+- **Interactive Simulation Controls:** Ability to test real-time notification engine dispatches (+ Missed Dose SMS, + High BP WhatsApp, + Pharmacy Refill).
 
 ---
 
@@ -109,14 +119,14 @@ graph TD
 
 ---
 
-## 5. Accessibility (WCAG AAA Engineering)
+## 5. Accessibility & Senior UX Engineering
 
 AayuCare implements high-impact accessibility features designed specifically for geriatric care:
-1. **Senior Accessibility Bar:** Sticky top navigation offering instant switches for High Contrast, Font Scaling, Speech Synthesis, and Language.
-2. **High-Contrast Dark Mode:** Obsidian black background (`#000000`) paired with high-visibility yellow (`#ffff00`) and emerald green for maximum readability for seniors with macular degeneration or cataracts.
-3. **Adaptive Typography Scaling:** 3-tier font size toggle (`A`, `A+`, `A++`) resizing heading and body elements dynamically across all screens.
-4. **Web Speech API Audio Narration:** Indian English & Hindi synthesized audio readout with 0.82x adjusted pacing for natural senior comprehension.
-5. **No Visual Ambiguity:** Color is never used as the sole conveyor of information — icons, high-contrast text tags, and status labels accompany every visual indicator.
+1. **Senior Accessibility Bar:** Sticky top navigation offering instant switches for Font Scaling (`A`, `A+`, `A++`), Speech Audio Toggle, and Language.
+2. **Adaptive Typography Scaling:** 3-tier font size toggle resizing heading and body elements dynamically across all screens.
+3. **Synchronized Word-by-Word Audio Narration:** Indian English & Hindi synthesized audio readout with `0.80x` adjusted pacing for senior comprehension.
+4. **No Visual Ambiguity:** Color is never used as the sole conveyor of information — icons, high-contrast text tags, and status labels accompany every visual indicator.
+5. **Clean Zero-Scrollbar Layout:** Role switcher and headers are responsive, avoiding accidental horizontal scrollbars or clipped buttons on touch screens.
 
 ---
 
@@ -135,66 +145,35 @@ Run tests locally:
 ```bash
 npm test
 ```
-*Result: 5 of 5 tests passing.*
+*Result: 5 of 5 tests passing in 1.34s.*
 
 ---
 
 ## 7. Assumptions & Future Scalability
 
 ### Assumptions:
-- **Default Master PIN:** Set to `1234` for rapid evaluator testing.
+- **Master Security PIN:** Set to `1234` for role verification.
 - **SMS & WhatsApp Dispatch:** Simulated via robust event telemetry, visual alert banners, and Web Audio chimes without external gateway overhead.
 - **Preloaded Persona:** Default initialized with *Ram Prasad Sharma (76 y/o)* to provide a comprehensive immediate clinical dataset upon first launch.
 
 ### Future Scalability Roadmap:
 1. **IoT Smart Blister Pack Integration:** Bluetooth / Zigbee integration with physical smart pillboxes that auto-detect blister foil piercing.
 2. **Official ABDM / Ayushman Bharat Digital Mission (ABHA ID):** Integration with India's national health stack (FHIR JSON health records sync).
-3. **Conversational WhatsApp & Telegram Bot:** Enabling non-tech-savvy family members to simply message `"Did Papa take his morning medicines?"` and receive automated real-time status replies.
+3. **Conversational WhatsApp & Telegram Bot:** Enabling family members to simply message `"Did Papa take his morning medicines?"` and receive automated real-time status replies.
 4. **Vernacular Dialect Voice Models:** Expand speech synthesis into regional Indian languages (Tamil, Telugu, Bengali, Marathi, Gujarati, Punjabi).
 
 ---
 
-## 8. Quick Start Guide
+## 8. Deployment Options
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or pnpm
+### ⚡ Option A: Live Vercel Deployment (Instant Public Web App)
+The application is deployed live on Vercel at:
+👉 **[https://aayu-care.vercel.app/](https://aayu-care.vercel.app/)**
 
-### Installation & Run
-```bash
-# 1. Clone repository
-git clone https://github.com/erica-maitri/AayuCare.git
-cd AayuCare
+### 🐳 Option B: Google Cloud Run Deployment
+AayuCare comes pre-configured with a production multi-stage `Dockerfile` and `nginx.conf` designed for **Google Cloud Run** on port `8080`.
 
-# 2. Install dependencies
-npm install
-
-# 3. Run development server
-npm run dev
-
-# 4. Run automated test suite
-npm test
-
-# 5. Build for production
-npm run build
-```
-
----
-
-## 9. Google Cloud Run Deployment Guide
-
-AayuCare comes pre-configured with a production-ready multi-stage `Dockerfile` and `nginx.conf` designed specifically for **Google Cloud Run** on port `8080`.
-
-### Option A: 1-Click via Cloud Run Console (Zero Laptop Installation)
-1. Go to the [Google Cloud Console - Cloud Run](https://console.cloud.google.com/run).
-2. Click **Create Service**.
-3. Select **"Continuously deploy from a repository"** and connect `https://github.com/erica-maitri/AayuCare`.
-4. Select branch `main` and Build Type **Dockerfile**.
-5. Check **"Allow unauthenticated invocations"** (public web app).
-6. Click **Create**. Cloud Run automatically builds and gives you a live public HTTPS URL (e.g., `https://aayucare-xxxx.a.run.app`).
-
-### Option B: Via Google Cloud Shell (In Browser, No Laptop Install)
-Open [Google Cloud Shell](https://shell.cloud.google.com) and run:
+**Deploy via Google Cloud Shell (No local install needed):**
 ```bash
 git clone https://github.com/erica-maitri/AayuCare.git
 cd AayuCare
@@ -203,7 +182,16 @@ gcloud run deploy aayucare \
   --region asia-south1 \
   --allow-unauthenticated
 ```
+
+### 💻 Option C: Local Development
+```bash
+git clone https://github.com/erica-maitri/AayuCare.git
+cd AayuCare
+npm install
+npm run dev
+# Opens http://localhost:3000
+```
+
 ---
 
 *Designed and engineered with care for India's seniors and their families.*
-
