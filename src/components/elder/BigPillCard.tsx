@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, Volume2, Clock, Droplets } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Volume2, Square, Clock, Droplets } from 'lucide-react';
 import { Medication, TimeOfDay } from '../../types';
 import { speechService } from '../../utils/speech';
 import { useApp } from '../../context/AppContext';
@@ -11,6 +11,7 @@ interface BigPillCardProps {
 
 export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTimeFilter }) => {
   const { markDoseTaken, accessibility } = useApp();
+  const [isReading, setIsReading] = useState(false);
   const isTaken = medication.takenToday?.[currentTimeFilter];
   const isHindi = accessibility.language === 'hi';
 
@@ -32,21 +33,36 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
       ? 'शाम'
       : 'रात';
 
-  // Speaks in English when in English mode; speaks in Hindi when in Hindi mode
-  const handleReadAloud = () => {
+  const handleToggleRead = () => {
+    if (isReading) {
+      speechService.stop();
+      setIsReading(false);
+      return;
+    }
+
     if (isHindi) {
       const spokenName = medication.brandName || medication.name;
       const hindiInstruction = medication.hindiInstructions || medication.instructions;
-      const hindiSpeech = `दवा का नाम ${spokenName} है। खुराक ${medication.dosage}। समय ${timeHindi}। निर्देश: ${hindiInstruction}।`;
+      const hindiSpeech = `दवा का नाम ${spokenName} है। खुराक ${medication.dosage}। समय ${timeHindi} ${scheduledTime}। निर्देश: ${hindiInstruction}।`;
+      
+      setIsReading(true);
       speechService.speak(hindiSpeech, {
         lang: 'hi-IN',
-        rate: 0.82
+        rate: 0.82,
+        onEnd: () => setIsReading(false),
+        onError: () => setIsReading(false)
       });
     } else {
-      const englishSpeech = `Medicine: ${medication.name}. Dosage: ${medication.dosage}. Scheduled for ${currentTimeFilter} at ${scheduledTime}. Instructions: ${medication.instructions}.`;
+      // Clear English word-by-word pronunciation
+      const cleanDosage = medication.dosage.replace(/mg/gi, 'milligrams');
+      const englishSpeech = `Medicine: ${medication.name}. Dosage: ${cleanDosage}. Scheduled for ${currentTimeFilter} at ${scheduledTime}. Instructions: ${medication.instructions}.`;
+      
+      setIsReading(true);
       speechService.speak(englishSpeech, {
-        lang: 'en-IN',
-        rate: 0.85
+        lang: 'en-US',
+        rate: 0.80, // Deliberate word-by-word pacing
+        onEnd: () => setIsReading(false),
+        onError: () => setIsReading(false)
       });
     }
   };
@@ -56,12 +72,14 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
       className={`rounded-3xl p-6 sm:p-7 transition-all border-4 shadow-lg ${
         isTaken
           ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500/80 opacity-90'
+          : isReading
+          ? 'bg-sky-50/70 dark:bg-sky-950/40 border-sky-500 shadow-xl ring-4 ring-sky-100 dark:ring-sky-900/50'
           : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-emerald-500 hover:shadow-xl'
       }`}
     >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         
-        {/* Left: Clean Prescription Details */}
+        {/* Left: Prescription Details */}
         <div className="flex items-start gap-4 sm:gap-5 flex-1 text-left">
           {/* Pill Icon with dynamic color */}
           <div
@@ -82,6 +100,11 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">
                 {medication.category}
               </span>
+              {isReading && (
+                <span className="text-xs font-bold bg-sky-200 dark:bg-sky-900 text-sky-800 dark:text-sky-200 px-2 py-0.5 rounded-full animate-pulse">
+                  🔊 Reading Aloud...
+                </span>
+              )}
             </div>
 
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -99,8 +122,12 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
             </div>
 
             {/* Clear Directions Box */}
-            <div className="bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-200 dark:border-amber-900/60 rounded-2xl p-3.5 sm:p-4 text-slate-800 dark:text-slate-200 mt-2">
-              <div className="flex items-start gap-2.5 font-bold text-sm sm:text-base text-amber-950 dark:text-amber-200">
+            <div className={`border-2 rounded-2xl p-3.5 sm:p-4 text-slate-800 dark:text-slate-200 mt-2 transition-all ${
+              isReading
+                ? 'bg-sky-100/80 dark:bg-sky-950/60 border-sky-400'
+                : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60'
+            }`}>
+              <div className="flex items-start gap-2.5 font-bold text-sm sm:text-base text-slate-900 dark:text-white">
                 <Droplets className="w-5 h-5 text-sky-500 flex-shrink-0 mt-0.5" />
                 <span>
                   {isHindi
@@ -112,19 +139,32 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
           </div>
         </div>
 
-        {/* Right: Actions (Read Aloud Synchronized with Mode & Big Green I Took My Medicine Button) */}
+        {/* Right: Actions (Read Aloud Button & Big Green Taken Button) */}
         <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-64 flex-shrink-0">
           
           {/* Read Aloud Button */}
           <button
-            onClick={handleReadAloud}
-            className="w-full py-3.5 px-4 rounded-2xl bg-sky-100 dark:bg-sky-950/70 hover:bg-sky-200 dark:hover:bg-sky-900 text-sky-950 dark:text-sky-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-sky-300 dark:border-sky-800 transition-all active:scale-98 shadow-sm"
+            onClick={handleToggleRead}
+            className={`w-full py-3.5 px-4 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-98 shadow-sm ${
+              isReading
+                ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 border-rose-400'
+                : 'bg-sky-100 dark:bg-sky-950/70 hover:bg-sky-200 dark:hover:bg-sky-900 text-sky-950 dark:text-sky-200 border-sky-300 dark:border-sky-800'
+            }`}
             title="Read prescription instructions out loud"
           >
-            <Volume2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span>
-              {isHindi ? 'पर्चा सुनें (हिंदी में)' : 'Read Prescription (English)'}
-            </span>
+            {isReading ? (
+              <>
+                <Square className="w-4 h-4 fill-current text-rose-600" />
+                <span>Stop Reading</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <span>
+                  {isHindi ? 'पर्चा सुनें (हिंदी में)' : 'Read Prescription (English)'}
+                </span>
+              </>
+            )}
           </button>
 
           {/* Big Green "I Took My Medicine" Button */}

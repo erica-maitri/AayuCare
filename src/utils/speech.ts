@@ -1,15 +1,26 @@
 /**
  * Browser Speech Synthesis Wrapper tailored for Elderly Care
- * Slow, crystal-clear pacing (0.85x) with bilingual support (English/Hindi).
+ * Crystal-clear word-by-word pronunciation with strict language isolation (English vs Hindi).
  */
 
 class SpeechService {
   private synth: SpeechSynthesis | null = null;
   private isSpeaking: boolean = false;
+  private voices: SpeechSynthesisVoice[] = [];
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.synth = window.speechSynthesis;
+      this.loadVoices();
+      if (this.synth.onvoiceschanged !== undefined) {
+        this.synth.onvoiceschanged = () => this.loadVoices();
+      }
+    }
+  }
+
+  private loadVoices() {
+    if (this.synth) {
+      this.voices = this.synth.getVoices();
     }
   }
 
@@ -23,6 +34,7 @@ class SpeechService {
       lang?: string;
       rate?: number;
       pitch?: number;
+      onStart?: () => void;
       onEnd?: () => void;
       onError?: () => void;
     }
@@ -33,25 +45,44 @@ class SpeechService {
       return;
     }
 
-    // Cancel any ongoing speech
+    // Cancel any ongoing speech immediately before starting new utterance
     this.stop();
 
+    if (this.voices.length === 0) {
+      this.loadVoices();
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = options?.lang || 'en-IN'; // Indian English / Hindi accent preferred
-    utterance.rate = options?.rate || 0.85; // Slightly slower pacing for senior citizens
+    const targetLang = (options?.lang || 'en-US').toLowerCase();
+
+    utterance.lang = options?.lang || (targetLang.startsWith('hi') ? 'hi-IN' : 'en-US');
+    // Steady, deliberate pacing for word-by-word comprehension
+    utterance.rate = options?.rate || (targetLang.startsWith('hi') ? 0.82 : 0.80);
     utterance.pitch = options?.pitch || 1.0;
 
-    // Pick best available voice if possible
-    const voices = this.synth.getVoices();
-    const preferredVoice = voices.find(v => 
-      v.lang.includes('hi') || v.lang.includes('en-IN') || v.name.includes('India')
-    );
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+    // Strict voice matching: Never use a Hindi voice for English or vice versa
+    if (targetLang.startsWith('hi')) {
+      const hindiVoice = this.voices.find(v => v.lang.toLowerCase().includes('hi'));
+      if (hindiVoice) {
+        utterance.voice = hindiVoice;
+      }
+    } else {
+      // Pick dedicated native English voice (US / GB / IN)
+      const englishVoice = this.voices.find(v => 
+        (v.lang.toLowerCase().includes('en-us') ||
+         v.lang.toLowerCase().includes('en-gb') ||
+         v.lang.toLowerCase().includes('en-in') ||
+         v.lang.toLowerCase().startsWith('en')) &&
+        !v.lang.toLowerCase().includes('hi')
+      );
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
     }
 
     utterance.onstart = () => {
       this.isSpeaking = true;
+      options?.onStart?.();
     };
 
     utterance.onend = () => {
@@ -81,4 +112,3 @@ class SpeechService {
 }
 
 export const speechService = new SpeechService();
-
