@@ -67,6 +67,7 @@ export const Header: React.FC = () => {
               onClick={() => setAssistantModalOpen(true)}
               className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-xl text-xs font-bold shadow-sm"
               title="AayuMitra AI Assistant"
+              aria-label="Open AayuMitra AI Health Assistant"
             >
               <Bot className="w-4 h-4" />
             </button>
@@ -75,6 +76,7 @@ export const Header: React.FC = () => {
               onClick={triggerSos}
               className="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 shadow-sm active:scale-95 animate-pulse"
               title="Emergency SOS"
+              aria-label="Trigger Emergency SOS alert"
             >
               <AlertTriangle className="w-3.5 h-3.5" />
               <span>SOS</span>
@@ -84,6 +86,7 @@ export const Header: React.FC = () => {
               onClick={() => setNotificationDrawerOpen(true)}
               className="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
               title="View Alerts"
+              aria-label="View notifications and carrier alerts"
             >
               <Bell className="w-4 h-4" />
               {activeNotificationCount > 0 && (
@@ -130,6 +133,7 @@ export const Header: React.FC = () => {
             onClick={() => setAssistantModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-sm transition-transform active:scale-95"
             title="Open Context-Aware AI Health Assistant"
+            aria-label="Open AayuMitra AI Health Assistant"
           >
             <Bot className="w-4 h-4 text-yellow-300 animate-pulse" />
             <span>AayuMitra AI</span>
@@ -155,6 +159,7 @@ export const Header: React.FC = () => {
             onClick={() => setNotificationDrawerOpen(true)}
             className="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
             title="Open Automated Escalation Logs"
+            aria-label="View automated family escalation logs"
           >
             <Bell className="w-4 h-4" />
             {activeNotificationCount > 0 && (
@@ -169,6 +174,7 @@ export const Header: React.FC = () => {
             onClick={triggerSos}
             className="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md shadow-rose-600/30 transition-transform active:scale-95 animate-pulse"
             title="Trigger Emergency SOS with Siren & GPS Escalation"
+            aria-label="Trigger Emergency SOS siren and family broadcast"
           >
             <PhoneCall className="w-3.5 h-3.5" />
             <span>SOS</span>

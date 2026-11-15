@@ -30,6 +30,7 @@ export const AccessibilityBar: React.FC = () => {
                 accessibility.fontSize === 'normal' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-300 hover:text-white'
               }`}
               title="Normal Text Size"
+              aria-label="Set standard normal text size"
             >
               A
             </button>
@@ -39,6 +40,7 @@ export const AccessibilityBar: React.FC = () => {
                 accessibility.fontSize === 'large' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-300 hover:text-white'
               }`}
               title="Large Text Size"
+              aria-label="Set large text size"
             >
               A+
             </button>
@@ -48,6 +50,7 @@ export const AccessibilityBar: React.FC = () => {
                 accessibility.fontSize === 'huge' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-300 hover:text-white'
               }`}
               title="Extra Large Text Size"
+              aria-label="Set extra large senior text size"
             >
               A++
             </button>
@@ -62,6 +65,7 @@ export const AccessibilityBar: React.FC = () => {
                 : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
             }`}
             title="Toggle Voice Assistant Speech"
+            aria-label="Toggle voice assistant speech audio narration"
           >
             {accessibility.speechEnabled ? (
               <>
@@ -81,6 +85,7 @@ export const AccessibilityBar: React.FC = () => {
             onClick={toggleLanguage}
             className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-sm"
             title="Switch Language (English / हिंदी)"
+            aria-label="Switch interface language between English and Hindi"
           >
             <Languages className="w-3.5 h-3.5" />
             <span>{accessibility.language === 'en' ? 'हिंदी में देखें' : 'View in English'}</span>

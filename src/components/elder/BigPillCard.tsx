@@ -151,6 +151,7 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
                 : 'bg-sky-100 dark:bg-sky-950/70 hover:bg-sky-200 dark:hover:bg-sky-900 text-sky-950 dark:text-sky-200 border-sky-300 dark:border-sky-800'
             }`}
             title="Read prescription instructions out loud"
+            aria-label={isReading ? 'Stop reading prescription' : (isHindi ? `पर्चा सुनें: ${medication.name}` : `Read prescription aloud for ${medication.name}`)}
           >
             {isReading ? (
               <>
@@ -169,7 +170,11 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
 
           {/* Big Green "I Took My Medicine" Button */}
           {isTaken ? (
-            <div className="w-full py-4 px-4 rounded-2xl bg-emerald-600 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md">
+            <div 
+              className="w-full py-4 px-4 rounded-2xl bg-emerald-600 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md"
+              role="status"
+              aria-label={`${medication.name} has been marked as taken`}
+            >
               <Check className="w-5 h-5 stroke-[3]" />
               <span>{isHindi ? 'दवा ले ली गई ✓' : 'Taken Successfully ✓'}</span>
             </div>
@@ -177,6 +182,7 @@ export const BigPillCard: React.FC<BigPillCardProps> = ({ medication, currentTim
             <button
               onClick={() => markDoseTaken(medication.id, currentTimeFilter)}
               className="w-full py-4 sm:py-5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-base sm:text-lg flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-600/30 border-4 border-emerald-400/80 transition-transform active:scale-95"
+              aria-label={`Confirm and mark ${medication.name} as taken for ${currentTimeFilter}`}
             >
               <Check className="w-6 h-6 stroke-[3]" />
               <span>{isHindi ? 'मैंने दवा ले ली' : 'I TOOK MY MEDICINE'}</span>

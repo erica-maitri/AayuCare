@@ -157,6 +157,7 @@ export const SmartAssistantModal: React.FC<{ isOpen: boolean; onClose: () => voi
           <button
             onClick={onClose}
             className="p-2 text-emerald-100 hover:text-white rounded-full hover:bg-white/10"
+            aria-label="Close AayuMitra assistant modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -257,10 +258,12 @@ export const SmartAssistantModal: React.FC<{ isOpen: boolean; onClose: () => voi
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder={isHindi ? 'दवा या स्वास्थ्य संबंधी सवाल पूछें...' : 'Ask about drug conflicts, missed doses, or BP target...'}
+            aria-label="Ask health question"
             className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <button
             type="submit"
+            aria-label="Send question to AayuMitra assistant"
             className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-md transition-transform active:scale-95"
           >
             <Send className="w-4 h-4" />

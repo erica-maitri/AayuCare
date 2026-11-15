@@ -55,6 +55,7 @@ export const PinModal: React.FC = () => {
             setError(false);
           }}
           className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+          aria-label="Close PIN security modal"
         >
           <X className="w-5 h-5" />
         </button>
@@ -112,30 +113,33 @@ export const PinModal: React.FC = () => {
               key={num}
               onClick={() => handleDigit(num)}
               className="py-3.5 text-lg font-bold rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition-all active:scale-95 border border-slate-200 dark:border-slate-700 shadow-sm"
+              aria-label={`Digit ${num}`}
             >
               {num}
             </button>
           ))}
           <button
             onClick={() => {
-              // Quick Auto-fill button for test demonstration
               setPin('1234');
               verify('1234');
             }}
             className="py-3 text-xs font-bold rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800 transition-all"
             title="Auto-fill default demo PIN"
+            aria-label="Auto fill default master PIN 1234"
           >
             Auto 1234
           </button>
           <button
             onClick={() => handleDigit('0')}
             className="py-3.5 text-lg font-bold rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition-all active:scale-95 border border-slate-200 dark:border-slate-700 shadow-sm"
+            aria-label="Digit 0"
           >
             0
           </button>
           <button
             onClick={handleDelete}
             className="py-3 text-sm font-bold rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+            aria-label="Delete last digit"
           >
             ⌫
           </button>
